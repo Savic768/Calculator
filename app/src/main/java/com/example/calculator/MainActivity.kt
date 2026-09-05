@@ -22,10 +22,14 @@ import androidx.lifecycle.ViewModel
 import com.example.calculator.ui.theme.CalculatorTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
+
         setContent {
             CalculatorTheme {
                 IosCalculator()
@@ -195,10 +199,23 @@ class CalculatorViewModel : ViewModel() {
     }
 
     private fun formatResult(result: Double): String {
-        return if (result % 1 == 0.0) {
-            result.toInt().toString()
+        if (result % 1 == 0.0) {
+            return result.toLong().toString()
+        }
+        val formatted = String.format("%.10f", result)
+        var cleaned = formatted.replace(" ", "")
+
+        if (cleaned.contains(".")) {
+            val parts = cleaned.split(".")
+            var integerPart = parts[0]
+            var decimalPart = parts[1]
+
+            if (decimalPart.length > 2) {
+                decimalPart = decimalPart.substring(0, 2)
+            }
+            return "${integerPart}.${decimalPart}"
         } else {
-            result.toString().replace(".", ",")
+            return cleaned
         }
     }
 
